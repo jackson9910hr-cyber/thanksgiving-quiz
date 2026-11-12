@@ -6,7 +6,7 @@
 <title>Thanksgiving Quiz · Host</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 .app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:18px 28px;gap:12px;overflow:hidden}
@@ -59,8 +59,8 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 /* Zoom round: the picture only takes the space left between the prompt and the answer options */
 .qtext:has(.visual.is-zoom){align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .visual.is-zoom{flex:1 1 0;min-height:140px;width:100%;container-type:size}
-.visual.is-zoom .zoombox{width:min(100cqh - 12px,100cqw - 12px,600px)}
-.zoombox .zi{position:absolute;left:10%;top:10%;width:80%;height:80%;image-rendering:auto}
+.visual.is-zoom .zoombox{aspect-ratio:auto;height:calc(100cqh - 12px);width:min(100cqw - 12px,(100cqh - 12px) * 1.9)}
+.zoombox .zi{position:absolute;left:10%;top:10%;width:80%;height:80%;max-width:none;image-rendering:auto}
 .v-ref{margin-top:14px;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,36px);color:var(--ink)}
 .v-ref span{font-family:var(--f-ko);font-weight:400;color:var(--pumpkin)}
 .credit{position:absolute;right:10px;bottom:6px;font-size:10px;color:#8a8470}
@@ -192,8 +192,8 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, update, remove, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
-import { firebaseConfig, TEAMS } from "./config.js?v=4";
-import { ROUNDS, QUESTIONS } from "./questions.js?v=4";
+import { firebaseConfig, TEAMS } from "./config.js?v=5";
+import { ROUNDS, QUESTIONS } from "./questions.js?v=5";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -305,7 +305,7 @@ function renderQuestion(Q, R, isReveal) {
       const [refEn, refKo] = (Q.ref || "").split(" · ");
       v.innerHTML = `<div class="v-initials">${esc(Q.visual)}</div>` + (Q.ref ? `<div class="v-ref">📖 ${esc(refEn)} <span>· ${esc(refKo || "")}</span></div>` : "");
     }
-    else v.innerHTML = `<div class="zoombox"><img class="zi" id="zoomEl" src="${Q.img}" alt="" data-ox="${parseFloat(Q.origin)/100}" data-oy="${parseFloat(Q.origin.split(" ")[1])/100}"><span class="credit">Twemoji · CC-BY 4.0</span></div>`;
+    else v.innerHTML = `<div class="zoombox"><img class="zi" id="zoomEl" src="${Q.img}" alt="" data-ox="${parseFloat(Q.origin)/100}" data-oy="${parseFloat(Q.origin.split(" ")[1])/100}"><span class="credit">Noto Emoji · Apache 2.0</span></div>`;
     setZoom(game.phase === "reveal" ? 1 : 9);
   }
   const dist = game.dist || [0,0,0,0];
@@ -324,15 +324,21 @@ function renderQuestion(Q, R, isReveal) {
 
 // Vector zoom: resize the SVG itself (not a bitmap scale) so it stays sharp on a big screen.
 // The chosen origin point stays fixed while the picture shrinks from 9x to 1x.
+// The box is wide (landscape), so the zoomed picture fills the whole width of the stage.
 function setZoom(k) {
   const z = $("zoomEl"); if (!z) return;
+  const box = z.parentElement, W = box.clientWidth, H = box.clientHeight;
+  if (!W || !H) return;
   const ox = +z.dataset.ox || .5, oy = +z.dataset.oy || .5;
-  const w = 80 * k;                       // % of box (80% at 1x)
-  const px = 10 + 80 * ox, py = 10 + 80 * oy; // origin point in box % at 1x
-  z.style.width = z.style.height = w + "%";
-  z.style.left = (px - ox * w) + "%";
-  z.style.top = (py - oy * w) + "%";
+  const s1 = 0.9 * Math.min(W, H);                   // picture size at 1x, centred
+  const px = (W - s1) / 2 + ox * s1, py = (H - s1) / 2 + oy * s1; // origin point in the box
+  const s = s1 * k;
+  z.style.width = z.style.height = s + "px";
+  z.style.left = (px - ox * s) + "px";
+  z.style.top = (py - oy * s) + "px";
 }
+
+addEventListener("resize", () => { if (game.phase === "reveal") setZoom(1); });
 
 // Timer + zoom loop
 function loop() {

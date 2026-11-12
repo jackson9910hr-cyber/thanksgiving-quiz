@@ -38,4 +38,4 @@
 행사 후에는 Firebase 콘솔 → Realtime Database → 규칙에서 `".read": false, ".write": false` 로 바꾸면 닫힙니다.
 
 ## 이미지 출처
-Zoom-In 라운드 그림: [Twemoji](https://github.com/jdecked/twemoji) (그래픽 CC-BY 4.0) — `img/` 폴더.
+Zoom-In 라운드 그림: [Noto Emoji](https://github.com/googlefonts/noto-emoji) (© Google, Apache License 2.0) — `img/` 폴더.
