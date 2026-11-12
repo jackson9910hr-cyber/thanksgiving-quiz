@@ -56,6 +56,10 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 .v-emoji{font-size:clamp(60px,8vw,150px);line-height:1.2}
 .v-initials{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,5.4vw,104px);letter-spacing:.04em;color:var(--gold);line-height:1.15;text-wrap:balance}
 .zoombox{position:relative;width:min(46vh,600px);aspect-ratio:1;max-width:100%;border-radius:28px;overflow:hidden;background:#fff8ea;box-shadow:0 0 0 6px var(--panel)}
+/* Zoom round: the picture only takes the space left between the prompt and the answer options */
+.qtext:has(.visual.is-zoom){align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.visual.is-zoom{flex:1 1 0;min-height:140px;width:100%;container-type:size}
+.visual.is-zoom .zoombox{width:min(100cqh - 12px,100cqw - 12px,600px)}
 .zoombox .zi{position:absolute;left:10%;top:10%;width:80%;height:80%;image-rendering:auto}
 .v-ref{margin-top:14px;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,36px);color:var(--ink)}
 .v-ref span{font-family:var(--f-ko);font-weight:400;color:var(--pumpkin)}
@@ -295,6 +299,7 @@ function renderQuestion(Q, R, isReveal) {
   if (lastRenderedQ !== game.q) {
     lastRenderedQ = game.q;
     const v = $("qVisual");
+    v.classList.toggle("is-zoom", Q.type === "zoom");
     if (Q.type === "emoji") v.innerHTML = `<div class="v-emoji">${esc(Q.visual)}</div>`;
     else if (Q.type === "initials") {
       const [refEn, refKo] = (Q.ref || "").split(" · ");
