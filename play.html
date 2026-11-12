@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c2419">
+<title>Thanksgiving Quiz · Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+body{min-height:100%;-webkit-tap-highlight-color:transparent}
+.wrap{min-height:100dvh;display:flex;flex-direction:column;
+  padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.top .b{font-family:var(--f-display);font-weight:800;font-size:18px}
+.top .b span{color:var(--gold)}
+.me{font-size:13px;padding:5px 10px;border-radius:999px;background:var(--panel);border-left:5px solid var(--tc,var(--gold))}
+.view{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-top:16px}
+h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1.05}
+h1 span{color:var(--gold)}
+.sub{font-family:var(--f-ko);color:var(--pumpkin);font-size:18px}
+label{font-size:14px;color:var(--muted)}
+input{width:100%;font:inherit;font-size:20px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.teams button{background:var(--panel);border:2px solid transparent;border-radius:16px;padding:14px 10px;text-align:left;border-top:6px solid var(--tc)}
+.teams button[aria-pressed="true"]{border-color:var(--tc);background:var(--panel-2)}
+.teams .tn{font-family:var(--f-display);font-weight:800;font-size:20px}
+.teams small{display:block;font-family:var(--f-ko);color:var(--muted);font-size:14px}
+.go{width:100%;padding:16px;border-radius:16px;border:0;background:var(--gold);color:#22190a;font-family:var(--f-display);font-weight:800;font-size:22px}
+.go:disabled{opacity:.4}
+.err{color:#f2a7b6;font-size:14px;min-height:1.2em}
+.center{text-align:center}
+.big{font-size:72px;line-height:1}
+.msg{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1.1}
+.msgk{font-family:var(--f-ko);color:var(--pumpkin);font-size:18px;margin-top:6px}
+.qinfo{display:flex;justify-content:space-between;align-items:center;font-family:var(--f-display);font-weight:800;color:var(--gold)}
+.answers{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;min-height:52vh}
+.answers button{background:var(--c);color:#1a140a;border:0;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;text-align:center;transition:transform .1s}
+.answers button:active{transform:scale(.96)}
+.answers .s{font-size:40px;line-height:1}
+.answers .t{font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1.15}
+.answers .k{font-family:var(--f-ko);font-size:13px;opacity:.8}
+.answers.long .t{font-size:14px}
+.answers button:disabled{opacity:.25}
+.answers button.picked{opacity:1;box-shadow:0 0 0 4px #fff8ea}
+.pts{font-family:var(--f-display);font-weight:800;font-size:56px;color:var(--gold);font-variant-numeric:tabular-nums}
+.card{background:var(--panel);border-radius:18px;padding:16px;display:grid;gap:6px}
+.card b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:13px;padding:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="b">THANKSGIVING <span>QUIZ</span></div>
+    <div class="me" id="me" hidden></div>
+  </div>
+
+  <!-- JOIN -->
+  <div class="view" id="v-join">
+    <div>
+      <h1>Join the <span>game!</span></h1>
+      <div class="sub">이름을 쓰고 팀을 고르세요</div>
+    </div>
+    <div style="display:grid;gap:6px">
+      <label for="nameIn">Your name · 이름 (or nickname · 별명)</label>
+      <input id="nameIn" maxlength="16" autocomplete="off" placeholder="e.g. Jackson">
+    </div>
+    <div style="display:grid;gap:6px">
+      <label>Pick your team · 팀 선택</label>
+      <div class="teams" id="teamBtns"></div>
+    </div>
+    <div class="err" id="joinErr"></div>
+    <button class="go" id="joinBtn" disabled>Join · 참가하기</button>
+  </div>
+
+  <!-- WAIT (lobby / intro / board) -->
+  <div class="view center" id="v-wait" hidden>
+    <div class="big" id="waitIcon">🙌</div>
+    <div class="msg" id="waitMsg">You're in!</div>
+    <div class="msgk" id="waitKo">참가 완료! 화면을 봐 주세요</div>
+    <div class="card" id="waitCard" hidden></div>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="view" id="v-q" hidden>
+    <div class="qinfo"><span id="qLabel">Q1 / 30</span><span id="qTime">20</span></div>
+    <div class="center"><div class="msg" style="font-size:22px" id="qPrompt">Look at the screen</div><div class="msgk" style="font-size:15px" id="qPromptKo">화면을 보고 답을 고르세요</div></div>
+    <div class="answers" id="answers"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="view center" id="v-res" hidden>
+    <div class="big" id="resIcon">🎉</div>
+    <div class="msg" id="resMsg">Correct!</div>
+    <div class="msgk" id="resKo">정답!</div>
+    <div class="pts" id="resPts">+0</div>
+    <div class="card"><span class="muted">My total · 내 점수</span><b id="resTotal">0</b></div>
+  </div>
+
+  <button class="link" id="leaveBtn" hidden>Change name or team · 이름/팀 바꾸기</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
+import { firebaseConfig, TEAMS } from "./config.js";
+import { ROUNDS, QUESTIONS } from "./questions.js";
+
+const db = getDatabase(initializeApp(firebaseConfig));
+const $ = id => document.getElementById(id);
+const LETTERS = ["A","B","C","D"], SHAPES = ["▲","◆","●","■"];
+const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
+
+let pid = store.get("tq_pid");
+if (!pid) { pid = "p" + Math.random().toString(36).slice(2, 10); store.set("tq_pid", pid); }
+let me = null, game = { phase: "lobby" }, offset = 0, myAnswer = null, myTotal = 0, pickedTeam = null;
+const now = () => Date.now() + offset;
+onValue(ref(db, ".info/serverTimeOffset"), s => offset = s.val() || 0);
+
+// Join screen
+$("teamBtns").innerHTML = TEAMS.map(t => `<button style="--tc:${t.color}" data-t="${t.id}" aria-pressed="false" id="team-${t.id}"><span class="tn">${t.icon} ${t.en}</span><small>${t.ko}</small></button>`).join("");
+$("teamBtns").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  pickedTeam = b.dataset.t;
+  document.querySelectorAll("#teamBtns button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  checkJoin();
+});
+$("nameIn").value = store.get("tq_name") || "";
+$("nameIn").addEventListener("input", checkJoin);
+function checkJoin() { $("joinBtn").disabled = !($("nameIn").value.trim() && pickedTeam); }
+$("joinBtn").addEventListener("click", async () => {
+  const name = $("nameIn").value.trim().slice(0, 16);
+  if (!name || !pickedTeam) return;
+  $("joinBtn").disabled = true;
+  try {
+    await set(ref(db, `players/${pid}`), { name, team: pickedTeam, joinedAt: serverTimestamp() });
+    store.set("tq_name", name);
+  } catch (e) { $("joinErr").textContent = "Could not join. Check your connection. · 연결을 확인하고 다시 눌러 주세요."; $("joinBtn").disabled = false; }
+});
+$("leaveBtn").addEventListener("click", () => remove(ref(db, `players/${pid}`)));
+
+onValue(ref(db, `players/${pid}`), s => { me = s.val(); render(); });
+onValue(ref(db, `totals/${pid}`), s => { myTotal = s.val() || 0; $("resTotal").textContent = myTotal.toLocaleString(); });
+onValue(ref(db, "game"), async s => {
+  const g = s.val() || { phase: "lobby" };
+  if (g.q !== game.q || g.phase === "question" && game.phase !== "question") {
+    myAnswer = null;
+    if (g.phase === "question" || g.phase === "reveal") {
+      const a = await get(ref(db, `answers/${g.q}/${pid}`));
+      if (a.exists()) myAnswer = a.val().c;
+    }
+  }
+  game = g; render();
+});
+
+function show(id) { ["join","wait","q","res"].forEach(v => $("v-"+v).hidden = v !== id); }
+
+function wait(icon, en, ko, card) {
+  show("wait"); $("waitIcon").textContent = icon; $("waitMsg").textContent = en; $("waitKo").textContent = ko;
+  $("waitCard").hidden = !card; if (card) $("waitCard").innerHTML = card;
+}
+
+async function render() {
+  if (!me) { show("join"); $("me").hidden = true; $("leaveBtn").hidden = true; return; }
+  const t = TEAMS.find(x => x.id === me.team) || TEAMS[0];
+  $("me").hidden = false; $("me").style.setProperty("--tc", t.color);
+  $("me").textContent = `${t.icon} ${me.name} · ${t.en}`;
+  $("leaveBtn").hidden = game.phase !== "lobby";
+  const ph = game.phase, Q = QUESTIONS[game.q ?? 0];
+  const scoreCard = `<span class="muted">My total · 내 점수</span><b>${myTotal.toLocaleString()}</b>`;
+
+  if (ph === "lobby") return wait("🙌", "You're in!", "참가 완료! 곧 시작해요", `<span class="muted">Team · 팀</span><b>${t.icon} ${t.en} (${t.ko})</b>`);
+  if (ph === "intro") { const R = ROUNDS[game.round]; return wait("📣", `Round ${game.round+1}: ${R.en}`, R.ko + (R.multiplier > 1 ? " · 점수 2배!" : ""), scoreCard); }
+  if (ph === "board") return wait("📊", "Check the leaderboard!", "화면에서 팀 순위를 확인하세요", scoreCard);
+  if (ph === "end") return wait("🏆", "Thanks for playing!", "함께해 주셔서 감사합니다 · Happy Thanksgiving!", scoreCard);
+
+  if (ph === "question") {
+    if (myAnswer !== null) return wait("🔒", "Answer locked!", "답을 냈어요. 결과를 기다려 주세요", null);
+    show("q");
+    $("qLabel").textContent = `Q${game.q+1} / ${QUESTIONS.length}`;
+    $("qPrompt").textContent = Q.prompt; $("qPromptKo").textContent = Q.ko;
+    const long = Q.options.some(o => o.en.length > 28);
+    $("answers").className = "answers" + (long ? " long" : "");
+    $("answers").innerHTML = Q.options.map((o, i) => `
+      <button class="opt-${LETTERS[i]}" data-i="${i}" id="ans-${i}">
+        <span class="s">${SHAPES[i]}</span><span class="t">${esc(o.en)}</span>${o.ko ? `<span class="k">${esc(o.ko)}</span>` : ""}
+      </button>`).join("");
+    return;
+  }
+  if (ph === "reveal") {
+    show("res");
+    const r = await get(ref(db, `results/${game.q}/${pid}`));
+    const pts = r.val() || 0;
+    const right = myAnswer === Q.answer;
+    $("resIcon").textContent = myAnswer === null ? "⏰" : right ? "🎉" : "😅";
+    $("resMsg").textContent = myAnswer === null ? "Time's up!" : right ? "Correct!" : "Not this time!";
+    $("resKo").textContent = myAnswer === null ? "시간이 끝났어요" : right ? "정답입니다!" : "아쉬워요! 정답: " + Q.options[Q.answer].en;
+    $("resPts").textContent = "+" + pts.toLocaleString();
+  }
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+$("answers").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b || myAnswer !== null || game.phase !== "question") return;
+  const c = +b.dataset.i;
+  myAnswer = c;
+  document.querySelectorAll("#answers button").forEach(x => { x.disabled = true; if (x === b) x.classList.add("picked"); });
+  try { navigator.vibrate && navigator.vibrate(40); } catch(e){}
+  try { await set(ref(db, `answers/${game.q}/${pid}`), { c, t: serverTimestamp() }); } catch(err) { myAnswer = null; }
+  render();
+});
+
+// countdown on phone
+setInterval(() => {
+  if (game.phase === "question" && typeof game.startAt === "number") {
+    const left = Math.max(0, (game.dur || 20000) - (now() - game.startAt));
+    $("qTime").textContent = Math.ceil(left / 1000) + "s";
+  }
+}, 250);
+</script>
+</body>
+</html>

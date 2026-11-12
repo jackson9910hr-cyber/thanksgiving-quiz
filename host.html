@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thanksgiving Quiz · Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:18px 28px;gap:12px;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(26px,2.6vw,42px);line-height:1}
+.brand h1 span{color:var(--gold)}
+.brand .ko{font-size:clamp(16px,1.6vw,24px)}
+.hstat{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+main{position:relative;min-height:0}
+section{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0}
+footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+footer .keys{font-size:13px;color:var(--muted)}
+kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px}
+
+/* Lobby */
+.lobby{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,60px);align-items:center;height:100%}
+.joinbox{background:#fff8ea;color:#1c2419;border-radius:24px;padding:22px;text-align:center;display:grid;gap:12px;justify-items:center}
+#qr{width:min(34vh,320px);height:min(34vh,320px)}
+#qr img,#qr canvas{width:100%!important;height:100%!important}
+.joinurl{font-family:var(--f-display);font-weight:800;font-size:clamp(14px,1.2vw,20px);word-break:break-all;max-width:340px}
+.lobby h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(44px,6vw,110px);line-height:.95}
+.lobby h2 span{color:var(--gold)}
+.teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.team{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;border-top:6px solid var(--tc);min-width:0}
+.team .tn{font-family:var(--f-display);font-weight:800;font-size:clamp(18px,1.6vw,26px)}
+.team .tn small{font-family:var(--f-ko);color:var(--muted);font-weight:400;font-size:.7em;margin-left:6px}
+.team .names{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5;max-height:4.5em;overflow:hidden}
+.team .cnt{float:right;font-family:var(--f-display);font-weight:800;color:var(--tc);font-variant-numeric:tabular-nums}
+
+/* Big cards (intro / end) */
+.bigcard{height:100%;display:grid;place-items:center;text-align:center}
+.bigcard .eyebrow{font-family:var(--f-display);font-weight:800;letter-spacing:.2em;color:var(--muted);font-size:clamp(16px,1.6vw,24px)}
+.bigcard .t{font-family:var(--f-display);font-weight:800;font-size:clamp(60px,9vw,170px);line-height:.95;color:var(--gold);margin:10px 0}
+.bigcard .k{font-family:var(--f-ko);font-size:clamp(26px,3vw,52px);color:var(--pumpkin)}
+.bigcard p{font-size:clamp(18px,1.8vw,30px);margin:18px 0 0}
+.bigcard .x2{display:inline-block;margin-top:16px;background:var(--berry);color:#fff;padding:8px 20px;border-radius:999px;font-family:var(--f-display);font-weight:800;font-size:clamp(18px,1.8vw,28px)}
+
+/* Question */
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.qtop .qn{font-family:var(--f-display);font-weight:800;color:var(--gold);font-size:clamp(18px,1.6vw,26px);font-variant-numeric:tabular-nums}
+.qmid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding-block:10px}
+.qtext{text-align:center;min-width:0}
+.prompt{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,3vw,54px);margin:0}
+.prompt-ko{font-family:var(--f-ko);color:var(--pumpkin);font-size:clamp(18px,1.8vw,30px);margin-top:4px}
+.visual{margin-top:clamp(10px,2vh,24px);display:grid;place-items:center}
+.v-emoji{font-size:clamp(60px,8vw,150px);line-height:1.2}
+.v-initials{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,5.4vw,104px);letter-spacing:.04em;color:var(--gold);line-height:1.15;text-wrap:balance}
+.zoombox{width:min(44vh,560px);aspect-ratio:1;max-width:100%;border-radius:28px;overflow:hidden;background:#f6eedc;display:grid;place-items:center;box-shadow:0 0 0 6px var(--panel)}
+.zoombox .z{font-size:min(30vh,380px);line-height:1;will-change:transform}
+.side{display:grid;gap:14px;justify-items:center}
+.timer{position:relative;width:clamp(120px,11vw,190px);aspect-ratio:1}
+.timer svg{width:100%;height:100%;transform:rotate(-90deg)}
+.timer .tr{stroke:var(--line);fill:none}
+.timer .pr{stroke:var(--gold);fill:none;stroke-linecap:round}
+.timer .n{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:clamp(44px,4.4vw,80px);font-variant-numeric:tabular-nums}
+.anscount{text-align:center;font-family:var(--f-display);font-weight:800;font-size:clamp(28px,2.6vw,46px);font-variant-numeric:tabular-nums;line-height:1}
+.anscount small{display:block;font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{position:relative;display:flex;align-items:center;gap:14px;background:var(--c);color:#1a140a;border-radius:18px;padding:clamp(12px,1.6vh,20px) 18px;min-height:clamp(64px,10vh,110px);overflow:hidden;transition:opacity .3s, transform .3s}
+.opt .ot{font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,36px);line-height:1.1;min-width:0}
+.opt .ok{display:block;font-family:var(--f-ko);font-weight:400;font-size:.62em;opacity:.8;margin-top:2px}
+.opt .bar{position:absolute;left:0;bottom:0;height:8px;background:rgba(0,0,0,.28);width:0;transition:width .8s ease}
+.opt .vc{margin-left:auto;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,34px);font-variant-numeric:tabular-nums}
+.revealing .opt{opacity:.28}
+.revealing .opt.correct{opacity:1;transform:scale(1.02);box-shadow:0 0 0 5px #fff8ea}
+.note{text-align:center;margin-top:10px;font-size:clamp(16px,1.6vw,26px);color:var(--ink)}
+
+/* Leaderboard */
+.board{height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px;max-width:1200px;margin:0 auto;width:100%}
+.board h2{margin:0 0 10px;font-family:var(--f-display);font-weight:800;font-size:clamp(36px,4vw,72px);text-align:center}
+.board h2 small{display:block;font-family:var(--f-ko);font-weight:400;color:var(--pumpkin);font-size:.45em}
+.row{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:14px;background:var(--panel);border-radius:16px;padding:10px 16px;border-left:8px solid var(--tc)}
+.row .rk{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,2vw,34px);color:var(--muted)}
+.row:first-of-type .rk{color:var(--gold)}
+.row .nm{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,2.2vw,38px);min-width:0}
+.row .nm small{font-family:var(--f-ko);font-weight:400;font-size:.6em;color:var(--muted);margin-left:8px}
+.row .sc{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,2.4vw,42px);font-variant-numeric:tabular-nums}
+.row .track{grid-column:2/4;height:8px;border-radius:99px;background:rgba(0,0,0,.25);overflow:hidden}
+.row .fill{height:100%;background:var(--tc);transition:width .9s ease}
+.podium{font-size:clamp(70px,8vw,140px)}
+.confirm{color:#f2a7b6}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>THANKSGIVING <span>QUIZ</span></h1>
+      <div class="ko">추수감사 퀴즈</div>
+    </div>
+    <div class="hstat">
+      <span class="chip" id="roundChip">Lobby · 대기실</span>
+      <span class="chip" id="playerChip">0 players · 참가자 0명</span>
+      <span class="chip" id="connChip">Connecting… · 연결 중</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOBBY -->
+    <section id="v-lobby">
+      <div class="lobby">
+        <div class="joinbox">
+          <div id="qr"></div>
+          <div class="joinurl" id="joinUrl"></div>
+        </div>
+        <div>
+          <h2>Scan to <span>join!</span></h2>
+          <div class="ko" style="font-size:clamp(22px,2.4vw,40px);margin-top:8px">QR을 찍고 팀을 고르세요!</div>
+          <p class="muted" style="font-size:clamp(16px,1.4vw,22px);margin:10px 0 0">3 rounds · 30 questions · Faster correct answers earn more points.<br>3라운드 · 30문제 · 빨리 맞힐수록 점수가 커요.</p>
+          <div class="teams" id="lobbyTeams"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROUND INTRO -->
+    <section id="v-intro" hidden>
+      <div class="bigcard"><div>
+        <div class="eyebrow" id="introEyebrow">ROUND 1 OF 3</div>
+        <div class="t" id="introTitle">Emoji Bible</div>
+        <div class="k" id="introKo">이모지 성경 퀴즈</div>
+        <p id="introDesc"></p>
+        <p class="muted" id="introDescKo" style="margin-top:6px"></p>
+        <div class="x2" id="introX2" hidden>DOUBLE POINTS · 점수 2배</div>
+      </div></div>
+    </section>
+
+    <!-- QUESTION / REVEAL -->
+    <section id="v-question" hidden>
+      <div class="qtop">
+        <span class="qn" id="qNum">Q1 / 30</span>
+        <span class="chip" id="qRound">Emoji Bible · 이모지 성경 퀴즈</span>
+      </div>
+      <div class="qmid">
+        <div class="qtext">
+          <h2 class="prompt" id="qPrompt">Who is this?</h2>
+          <div class="prompt-ko" id="qPromptKo">누구일까요?</div>
+          <div class="visual" id="qVisual"></div>
+          <div class="note" id="qNote" hidden></div>
+        </div>
+        <div class="side">
+          <div class="timer">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="tr" cx="50" cy="50" r="44" stroke-width="7"/><circle class="pr" id="tProg" cx="50" cy="50" r="44" stroke-width="7"/></svg>
+            <div class="n" id="tNum">20</div>
+          </div>
+          <div class="anscount"><span id="aCount">0</span><small>answers · 응답</small></div>
+        </div>
+      </div>
+      <div class="opts" id="qOpts"></div>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section id="v-board" hidden>
+      <div class="board" id="boardBox"></div>
+    </section>
+
+    <!-- END -->
+    <section id="v-end" hidden>
+      <div class="board" id="endBox"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" id="nextBtn">Start Game ▶</button>
+      <button class="btn" id="fullBtn">⛶ Fullscreen</button>
+    </div>
+    <div class="keys"><kbd>Space</kbd>/<kbd>→</kbd> Next · <kbd>F</kbd> Fullscreen</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn danger" id="resetBtn">Reset Scores</button>
+      <button class="btn danger" id="clearBtn">Clear Players</button>
+    </div>
+  </footer>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, remove, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
+import { firebaseConfig, TEAMS } from "./config.js";
+import { ROUNDS, QUESTIONS } from "./questions.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const $ = id => document.getElementById(id);
+const LETTERS = ["A","B","C","D"], SHAPES = ["▲","◆","●","■"];
+const N = QUESTIONS.length;
+const C = 2*Math.PI*44; $("tProg").style.strokeDasharray = C;
+
+let offset = 0, game = { phase: "lobby" }, players = {}, totals = {}, answers = {};
+let revealing = false, ansUnsub = null, ansQ = -1;
+const now = () => Date.now() + offset;
+
+// Join URL + QR (play.html next to this file)
+const joinUrl = new URL("play.html", location.href).href;
+$("joinUrl").textContent = joinUrl;
+try { new QRCode($("qr"), { text: joinUrl, width: 320, height: 320, colorDark: "#1c2419", colorLight: "#fff8ea" }); } catch(e) {}
+
+onValue(ref(db, ".info/connected"), s => {
+  $("connChip").textContent = s.val() ? "● Live · 연결됨" : "○ Offline · 연결 끊김";
+  $("connChip").style.color = s.val() ? "#9fd28a" : "#f2a7b6";
+});
+onValue(ref(db, ".info/serverTimeOffset"), s => offset = s.val() || 0);
+onValue(ref(db, "players"), s => { players = s.val() || {}; renderPlayers(); });
+onValue(ref(db, "totals"), s => { totals = s.val() || {}; if (game.phase === "board" || game.phase === "end") render(); });
+onValue(ref(db, "game"), s => { game = s.val() || { phase: "lobby" }; revealing = false; watchAnswers(); render(); });
+
+function watchAnswers() {
+  const q = game.phase === "question" || game.phase === "reveal" ? game.q : -1;
+  if (q === ansQ) return;
+  if (ansUnsub) { ansUnsub(); ansUnsub = null; }
+  ansQ = q; answers = {};
+  if (q < 0) return;
+  ansUnsub = onValue(ref(db, `answers/${q}`), s => { answers = s.val() || {}; $("aCount").textContent = Object.keys(answers).length; });
+}
+
+const playerCount = () => Object.keys(players).length;
+function teamScores() {
+  return TEAMS.map(t => {
+    const ids = Object.keys(players).filter(id => players[id].team === t.id);
+    const sum = ids.reduce((a, id) => a + (totals[id] || 0), 0);
+    return { ...t, members: ids.length, score: ids.length ? Math.round(sum / ids.length) : 0 };
+  }).filter(t => t.members > 0).sort((a, b) => b.score - a.score);
+}
+
+function renderPlayers() {
+  $("playerChip").textContent = `${playerCount()} players · 참가자 ${playerCount()}명`;
+  $("lobbyTeams").innerHTML = TEAMS.map(t => {
+    const names = Object.values(players).filter(p => p.team === t.id).map(p => p.name);
+    return `<div class="team" style="--tc:${t.color}"><span class="cnt">${names.length}</span>
+      <div class="tn">${t.icon} ${t.en}<small>${t.ko}</small></div>
+      <div class="names">${names.map(esc).join(" · ") || "—"}</div></div>`;
+  }).join("");
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+function show(id) { ["lobby","intro","question","board","end"].forEach(v => $("v-"+v).hidden = v !== id); }
+
+function render() {
+  const ph = game.phase;
+  const Q = QUESTIONS[game.q ?? 0];
+  const R = ROUNDS[(ph === "intro" ? game.round : Q?.r) ?? 0];
+  $("roundChip").textContent = ph === "lobby" ? "Lobby · 대기실" : ph === "end" ? "Final · 최종 결과" : `${R.en} · ${R.ko}`;
+  const nb = $("nextBtn");
+  nb.textContent = { lobby:"Start Game ▶", intro:"Start Round ▶", question:"Show Answer ▶", reveal:"Leaderboard ▶", board: (game.q >= N-1 ? "Final Results ▶" : "Next Question ▶"), end:"Done ✓" }[ph] || "Next ▶";
+
+  if (ph === "lobby") { show("lobby"); return; }
+  if (ph === "intro") {
+    show("intro");
+    $("introEyebrow").textContent = `ROUND ${game.round+1} OF ${ROUNDS.length}`;
+    $("introTitle").textContent = R.en; $("introKo").textContent = R.ko;
+    $("introDesc").textContent = R.desc; $("introDescKo").textContent = R.descKo;
+    $("introX2").hidden = R.multiplier < 2;
+    return;
+  }
+  if (ph === "question" || ph === "reveal") { renderQuestion(Q, R, ph === "reveal"); return; }
+  if (ph === "board") { show("board"); $("boardBox").innerHTML = boardHtml("Leaderboard", "팀 순위", 6); return; }
+  if (ph === "end") {
+    show("end");
+    const ts = teamScores();
+    $("endBox").innerHTML = `<div style="text-align:center"><div class="podium">🏆</div></div>` +
+      boardHtml(ts[0] ? `${ts[0].icon} Team ${ts[0].en} wins!` : "Thank you!", ts[0] ? `${ts[0].ko} 팀 우승! · Happy Thanksgiving!` : "감사합니다!", 6);
+  }
+}
+
+function boardHtml(title, ko, limit) {
+  const ts = teamScores().slice(0, limit);
+  const max = Math.max(1, ...ts.map(t => t.score));
+  return `<h2>${esc(title)}<small>${esc(ko)}</small></h2>` + (ts.length ? ts.map((t, i) => `
+    <div class="row" style="--tc:${t.color}">
+      <div class="rk">${i+1}</div>
+      <div class="nm">${t.icon} ${t.en}<small>${t.ko} · ${t.members}명</small></div>
+      <div class="sc">${t.score.toLocaleString()}</div>
+      <div class="track"><div class="fill" style="width:${Math.round(t.score/max*100)}%"></div></div>
+    </div>`).join("") : `<p class="muted" style="text-align:center">No players yet · 아직 참가자가 없어요</p>`);
+}
+
+let lastRenderedQ = -1;
+function renderQuestion(Q, R, isReveal) {
+  show("question");
+  $("qNum").textContent = `Q${game.q+1} / ${N}` + (R.multiplier > 1 ? "  ×2" : "");
+  $("qRound").textContent = `${R.en} · ${R.ko}`;
+  $("qPrompt").textContent = Q.prompt; $("qPromptKo").textContent = Q.ko;
+  if (lastRenderedQ !== game.q) {
+    lastRenderedQ = game.q;
+    const v = $("qVisual");
+    if (Q.type === "emoji") v.innerHTML = `<div class="v-emoji">${esc(Q.visual)}</div>`;
+    else if (Q.type === "initials") v.innerHTML = `<div class="v-initials">${esc(Q.visual)}</div>`;
+    else v.innerHTML = `<div class="zoombox"><div class="z" id="zoomEl" style="transform-origin:${Q.origin}">${esc(Q.visual)}</div></div>`;
+  }
+  const dist = game.dist || [0,0,0,0];
+  const total = Math.max(1, dist.reduce((a,b)=>a+b,0));
+  $("qOpts").innerHTML = Q.options.map((o, i) => `
+    <div class="opt opt-${LETTERS[i]} ${isReveal && i === Q.answer ? "correct" : ""}">
+      <span class="shape">${SHAPES[i]}</span>
+      <div class="ot">${esc(o.en)}${o.ko ? `<span class="ok">${esc(o.ko)}</span>` : ""}</div>
+      ${isReveal ? `<span class="vc">${dist[i]||0}</span><div class="bar" style="width:${Math.round((dist[i]||0)/total*100)}%"></div>` : ""}
+    </div>`).join("");
+  $("qOpts").classList.toggle("revealing", isReveal);
+  $("qNote").hidden = !(isReveal && Q.note);
+  if (isReveal && Q.note) $("qNote").textContent = "✓ " + Q.note;
+  if (isReveal) { $("tNum").textContent = "✓"; $("tProg").style.strokeDashoffset = 0; const z = $("zoomEl"); if (z) z.style.transform = "scale(1)"; }
+}
+
+// Timer + zoom loop
+function loop() {
+  if (game.phase === "question" && typeof game.startAt === "number") {
+    const dur = game.dur || 20000;
+    const el = Math.max(0, now() - game.startAt);
+    const left = Math.max(0, dur - el);
+    $("tNum").textContent = Math.ceil(left / 1000);
+    $("tProg").style.strokeDashoffset = C * (1 - left / dur);
+    $("tProg").style.stroke = left < 5000 ? "var(--pumpkin)" : "var(--gold)";
+    const z = $("zoomEl");
+    if (z) { const p = Math.min(1, el / (dur * 0.9)); z.style.transform = `scale(${(9 - 8 * Math.pow(p, 0.8)).toFixed(3)})`; }
+    const pc = playerCount();
+    if (!revealing && (left <= 0 || (pc > 0 && Object.keys(answers).length >= pc))) reveal();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+async function reveal() {
+  if (revealing || game.phase !== "question") return;
+  revealing = true;
+  const q = game.q, Q = QUESTIONS[q], R = ROUNDS[Q.r], dur = game.dur || 20000;
+  const snap = await get(ref(db, `answers/${q}`));
+  const ans = snap.val() || {};
+  const dist = [0,0,0,0], upd = {};
+  for (const [pid, a] of Object.entries(ans)) {
+    if (typeof a.c === "number") dist[a.c] = (dist[a.c] || 0) + 1;
+    const el = (a.t || 0) - game.startAt;
+    let pts = 0;
+    if (a.c === Q.answer && el <= dur + 1500) pts = Math.round(1000 * (1 - 0.5 * Math.min(1, Math.max(0, el) / dur))) * R.multiplier;
+    upd[`results/${q}/${pid}`] = pts;
+    upd[`totals/${pid}`] = (totals[pid] || 0) + pts;
+  }
+  upd["game/phase"] = "reveal";
+  upd["game/dist"] = dist;
+  await update(ref(db), upd);
+}
+
+function startQuestion(q) {
+  return set(ref(db, "game"), { phase: "question", q, round: QUESTIONS[q].r, startAt: serverTimestamp(), dur: ROUNDS[QUESTIONS[q].r].dur });
+}
+
+async function next() {
+  const ph = game.phase;
+  if (ph === "lobby") return set(ref(db, "game"), { phase: "intro", round: 0, q: 0 });
+  if (ph === "intro") return startQuestion(game.q);
+  if (ph === "question") return reveal();
+  if (ph === "reveal") return update(ref(db, "game"), { phase: "board" });
+  if (ph === "board") {
+    const nq = game.q + 1;
+    if (nq >= N) return update(ref(db, "game"), { phase: "end" });
+    if (QUESTIONS[nq].r !== QUESTIONS[game.q].r) return set(ref(db, "game"), { phase: "intro", round: QUESTIONS[nq].r, q: nq });
+    return startQuestion(nq);
+  }
+}
+
+// Two-click confirm buttons (no browser dialogs)
+function confirmBtn(btn, label, action) {
+  let armed = false, t;
+  btn.addEventListener("click", async () => {
+    if (!armed) { armed = true; btn.textContent = "Click again to confirm · 한 번 더"; btn.classList.add("confirm"); t = setTimeout(() => { armed = false; btn.textContent = label; btn.classList.remove("confirm"); }, 3000); return; }
+    clearTimeout(t); armed = false; btn.textContent = label; btn.classList.remove("confirm");
+    await action();
+  });
+}
+confirmBtn($("resetBtn"), "Reset Scores", () => update(ref(db), { answers: null, results: null, totals: null, game: { phase: "lobby" } }));
+confirmBtn($("clearBtn"), "Clear Players", () => update(ref(db), { answers: null, results: null, totals: null, players: null, game: { phase: "lobby" } }));
+
+$("nextBtn").addEventListener("click", next);
+$("fullBtn").addEventListener("click", () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); } catch(e){} });
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === " " || e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); next(); }
+  else if (e.key === "f" || e.key === "F") $("fullBtn").click();
+});
+</script>
+</body>
+</html>

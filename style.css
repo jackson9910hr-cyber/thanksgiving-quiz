@@ -1,0 +1,32 @@
+/* Thanksgiving Quiz — harvest palette shared by host and player screens */
+:root{
+  --bg:#1c2419; --bg-2:#26301f; --panel:#2f3a27; --panel-2:#38452f;
+  --ink:#f6eedc; --muted:#b9b29c;
+  --gold:#e8b44a; --pumpkin:#e2733b; --berry:#b8425a; --sage:#6f9a5a;
+  --line:rgba(246,238,220,.14);
+  --optA:#e2733b; --optB:#d9a13a; --optC:#b8425a; --optD:#5f8f58;
+  --f-display:"Bricolage Grotesque","Arial Black",system-ui,sans-serif;
+  --f-ko:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);
+  background:
+    radial-gradient(1200px 600px at 85% 110%, rgba(226,115,59,.16), transparent 60%),
+    radial-gradient(900px 500px at -10% -20%, rgba(232,180,74,.10), transparent 60%),
+    var(--bg);}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+[hidden]{display:none!important}
+.en-d{font-family:var(--f-display);font-weight:800}
+.ko{font-family:var(--f-ko);color:var(--pumpkin)}
+.muted{color:var(--muted)}
+.chip{display:inline-block;padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:15px}
+.btn{background:var(--panel);border:1px solid var(--line);padding:10px 18px;border-radius:12px}
+.btn.primary{background:var(--gold);color:#22190a;border-color:var(--gold);font-weight:700}
+.btn.danger{border-color:rgba(184,66,90,.6);color:#f2a7b6}
+.opt-A{--c:var(--optA)} .opt-B{--c:var(--optB)} .opt-C{--c:var(--optC)} .opt-D{--c:var(--optD)}
+.shape{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:10px;background:rgba(0,0,0,.18);font-size:.9em;flex:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
