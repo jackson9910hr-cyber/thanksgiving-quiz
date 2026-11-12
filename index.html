@@ -59,7 +59,7 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 /* Zoom round: the picture only takes the space left between the prompt and the answer options */
 .qtext:has(.visual.is-zoom){align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .visual.is-zoom{flex:1 1 0;min-height:140px;width:100%;container-type:size}
-.visual.is-zoom .zoombox{aspect-ratio:auto;height:calc(100cqh - 12px);width:min(100cqw - 12px,(100cqh - 12px) * 1.9)}
+.visual.is-zoom .zoombox{width:min(100cqh - 12px,100cqw - 12px,600px)}
 .zoombox .zi{position:absolute;left:10%;top:10%;width:80%;height:80%;max-width:none;image-rendering:auto}
 .v-ref{margin-top:14px;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,36px);color:var(--ink)}
 .v-ref span{font-family:var(--f-ko);font-weight:400;color:var(--pumpkin)}
@@ -324,7 +324,7 @@ function renderQuestion(Q, R, isReveal) {
 
 // Vector zoom: resize the SVG itself (not a bitmap scale) so it stays sharp on a big screen.
 // The chosen origin point stays fixed while the picture shrinks from 9x to 1x.
-// The box is wide (landscape), so the zoomed picture fills the whole width of the stage.
+// Sized in pixels from the box, so it works for any box shape.
 function setZoom(k) {
   const z = $("zoomEl"); if (!z) return;
   const box = z.parentElement, W = box.clientWidth, H = box.clientHeight;
