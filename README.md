@@ -36,3 +36,6 @@
 ## 보안 메모
 데이터베이스는 테스트 모드(약 30일 공개)입니다. 이름은 별명으로 받고 개인정보는 넣지 마세요.
 행사 후에는 Firebase 콘솔 → Realtime Database → 규칙에서 `".read": false, ".write": false` 로 바꾸면 닫힙니다.
+
+## 이미지 출처
+Zoom-In 라운드 그림: [Twemoji](https://github.com/jdecked/twemoji) (그래픽 CC-BY 4.0) — `img/` 폴더.

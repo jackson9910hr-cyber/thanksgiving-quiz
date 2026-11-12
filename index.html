@@ -55,8 +55,11 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 .visual{margin-top:clamp(10px,2vh,24px);display:grid;place-items:center}
 .v-emoji{font-size:clamp(60px,8vw,150px);line-height:1.2}
 .v-initials{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,5.4vw,104px);letter-spacing:.04em;color:var(--gold);line-height:1.15;text-wrap:balance}
-.zoombox{width:min(44vh,560px);aspect-ratio:1;max-width:100%;border-radius:28px;overflow:hidden;background:#f6eedc;display:grid;place-items:center;box-shadow:0 0 0 6px var(--panel)}
-.zoombox .z{font-size:min(30vh,380px);line-height:1;will-change:transform}
+.zoombox{position:relative;width:min(46vh,600px);aspect-ratio:1;max-width:100%;border-radius:28px;overflow:hidden;background:#fff8ea;box-shadow:0 0 0 6px var(--panel)}
+.zoombox .zi{position:absolute;left:10%;top:10%;width:80%;height:80%;image-rendering:auto}
+.v-ref{margin-top:14px;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2vw,36px);color:var(--ink)}
+.v-ref span{font-family:var(--f-ko);font-weight:400;color:var(--pumpkin)}
+.credit{position:absolute;right:10px;bottom:6px;font-size:10px;color:#8a8470}
 .side{display:grid;gap:14px;justify-items:center}
 .timer{position:relative;width:clamp(120px,11vw,190px);aspect-ratio:1}
 .timer svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -293,8 +296,12 @@ function renderQuestion(Q, R, isReveal) {
     lastRenderedQ = game.q;
     const v = $("qVisual");
     if (Q.type === "emoji") v.innerHTML = `<div class="v-emoji">${esc(Q.visual)}</div>`;
-    else if (Q.type === "initials") v.innerHTML = `<div class="v-initials">${esc(Q.visual)}</div>`;
-    else v.innerHTML = `<div class="zoombox"><div class="z" id="zoomEl" style="transform-origin:${Q.origin}">${esc(Q.visual)}</div></div>`;
+    else if (Q.type === "initials") {
+      const [refEn, refKo] = (Q.ref || "").split(" · ");
+      v.innerHTML = `<div class="v-initials">${esc(Q.visual)}</div>` + (Q.ref ? `<div class="v-ref">📖 ${esc(refEn)} <span>· ${esc(refKo || "")}</span></div>` : "");
+    }
+    else v.innerHTML = `<div class="zoombox"><img class="zi" id="zoomEl" src="${Q.img}" alt="" data-ox="${parseFloat(Q.origin)/100}" data-oy="${parseFloat(Q.origin.split(" ")[1])/100}"><span class="credit">Twemoji · CC-BY 4.0</span></div>`;
+    setZoom(game.phase === "reveal" ? 1 : 9);
   }
   const dist = game.dist || [0,0,0,0];
   const total = Math.max(1, dist.reduce((a,b)=>a+b,0));
@@ -307,7 +314,19 @@ function renderQuestion(Q, R, isReveal) {
   $("qOpts").classList.toggle("revealing", isReveal);
   $("qNote").hidden = !(isReveal && Q.note);
   if (isReveal && Q.note) $("qNote").textContent = "✓ " + Q.note;
-  if (isReveal) { $("tNum").textContent = "✓"; $("tProg").style.strokeDashoffset = 0; const z = $("zoomEl"); if (z) z.style.transform = "scale(1)"; }
+  if (isReveal) { $("tNum").textContent = "✓"; $("tProg").style.strokeDashoffset = 0; setZoom(1); }
+}
+
+// Vector zoom: resize the SVG itself (not a bitmap scale) so it stays sharp on a big screen.
+// The chosen origin point stays fixed while the picture shrinks from 9x to 1x.
+function setZoom(k) {
+  const z = $("zoomEl"); if (!z) return;
+  const ox = +z.dataset.ox || .5, oy = +z.dataset.oy || .5;
+  const w = 80 * k;                       // % of box (80% at 1x)
+  const px = 10 + 80 * ox, py = 10 + 80 * oy; // origin point in box % at 1x
+  z.style.width = z.style.height = w + "%";
+  z.style.left = (px - ox * w) + "%";
+  z.style.top = (py - oy * w) + "%";
 }
 
 // Timer + zoom loop
@@ -319,8 +338,8 @@ function loop() {
     $("tNum").textContent = Math.ceil(left / 1000);
     $("tProg").style.strokeDashoffset = C * (1 - left / dur);
     $("tProg").style.stroke = left < 5000 ? "var(--pumpkin)" : "var(--gold)";
-    const z = $("zoomEl");
-    if (z) { const p = Math.min(1, el / (dur * 0.9)); z.style.transform = `scale(${(9 - 8 * Math.pow(p, 0.8)).toFixed(3)})`; }
+    const p = Math.min(1, el / (dur * 0.9));
+    setZoom(9 - 8 * Math.pow(p, 0.8));
     const pc = playerCount();
     if (!revealing && (left <= 0 || (pc > 0 && Object.keys(answers).length >= pc))) reveal();
   }
