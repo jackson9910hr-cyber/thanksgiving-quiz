@@ -6,7 +6,7 @@
 <title>Thanksgiving Quiz · Host</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 .app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:18px 28px;gap:12px;overflow:hidden}
@@ -188,8 +188,8 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, update, remove, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
-import { firebaseConfig, TEAMS } from "./config.js?v=3";
-import { ROUNDS, QUESTIONS } from "./questions.js?v=3";
+import { firebaseConfig, TEAMS } from "./config.js?v=4";
+import { ROUNDS, QUESTIONS } from "./questions.js?v=4";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
