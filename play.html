@@ -7,7 +7,7 @@
 <title>Thanksgiving Quiz · Play</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 <style>
 body{min-height:100%;-webkit-tap-highlight-color:transparent}
 .wrap{min-height:100dvh;display:flex;flex-direction:column;
@@ -105,8 +105,8 @@ input{width:100%;font:inherit;font-size:20px;padding:14px 16px;border-radius:14p
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
-import { firebaseConfig, TEAMS } from "./config.js";
-import { ROUNDS, QUESTIONS } from "./questions.js";
+import { firebaseConfig, TEAMS } from "./config.js?v=3";
+import { ROUNDS, QUESTIONS } from "./questions.js?v=3";
 
 const db = getDatabase(initializeApp(firebaseConfig));
 const $ = id => document.getElementById(id);
