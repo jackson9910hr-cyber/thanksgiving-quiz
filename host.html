@@ -200,7 +200,7 @@ let revealing = false, ansUnsub = null, ansQ = -1;
 const now = () => Date.now() + offset;
 
 // Join URL + QR (play.html next to this file)
-const joinUrl = new URL("play.html", location.href).href;
+const joinUrl = new URL("play.html", location.href.replace(/[?#].*$/, "")).href;
 $("joinUrl").textContent = joinUrl;
 try { new QRCode($("qr"), { text: joinUrl, width: 320, height: 320, colorDark: "#1c2419", colorLight: "#fff8ea" }); } catch(e) {}
 
