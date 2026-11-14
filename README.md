@@ -39,3 +39,4 @@
 
 ## 이미지 출처
 Zoom-In 라운드 그림: [Noto Emoji](https://github.com/googlefonts/noto-emoji) (© Google, Apache License 2.0) — `img/` 폴더.
+Emoji Bible 라운드 그림: 같은 Noto Emoji — `img/emoji/` 폴더 (PC 이모지 글꼴과 관계없이 모든 화면에서 똑같이 보임). 이집트 국기만 [flag-icons](https://github.com/lipis/flag-icons) (MIT).

@@ -33,7 +33,7 @@ export const QUESTIONS = [
     prompt: "Who is this?", ko: "누구일까요?",
     options: [{en:"Samson",ko:"삼손"},{en:"David",ko:"다윗"},{en:"Daniel",ko:"다니엘"},{en:"Joseph",ko:"요셉"}],
     answer: 2, note: "Daniel 6 · 다니엘 6장" },
-  { r: 0, type: "emoji", visual: "🍞×5 🐟×2 👨‍👩‍👧‍👦×5000",
+  { r: 0, type: "emoji", visual: "🍞×5 🐟×2 🧑‍🤝‍🧑×5000",
     prompt: "Which story is this?", ko: "어떤 이야기일까요?",
     options: [{en:"The Last Supper",ko:"최후의 만찬"},{en:"Manna from Heaven",ko:"하늘의 만나"},{en:"Feeding the 5,000",ko:"오병이어 기적"},{en:"Wedding at Cana",ko:"가나 혼인 잔치"}],
     answer: 2, note: "John 6 · 요한복음 6장" },
