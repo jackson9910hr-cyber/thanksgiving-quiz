@@ -15,6 +15,17 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;fl
 .brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(26px,2.6vw,42px);line-height:1}
 .brand h1 span{color:var(--gold)}
 .brand .ko{font-size:clamp(16px,1.6vw,24px)}
+/* Host ministry name: outlined, with a warm "light" glow */
+.org{flex:1 1 auto;text-align:center;font-family:var(--f-display);font-weight:800;font-size:clamp(18px,1.9vw,32px);letter-spacing:.05em;line-height:1.1;color:#fff8ea;-webkit-text-stroke:.16em #5a3412;paint-order:stroke fill;text-shadow:0 0 .6em rgba(242,183,64,.55),0 .08em 0 rgba(0,0,0,.45)}
+.org b{color:var(--gold)}
+@media (max-width:1700px){
+  header{flex-wrap:nowrap}
+  .brand{flex-wrap:nowrap;flex:none}
+  #roundChip{display:none}   /* round name is already shown above the question */
+  .brand{gap:10px}.brand .ko{font-size:clamp(13px,1.3vw,22px)}
+  .org{min-width:0;font-size:clamp(15px,1.6vw,26px);text-wrap:balance}
+  .hstat{flex:none}
+}
 .hstat{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 main{position:relative;min-height:0}
 section{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0}
@@ -106,6 +117,7 @@ kbd{font-family:var(--f-display);border:1px solid var(--line);border-radius:6px;
       <h1>THANKSGIVING <span>QUIZ</span></h1>
       <div class="ko">추수감사 퀴즈</div>
     </div>
+    <div class="org">Bujeon Church · <b>United Light Ministry</b></div>
     <div class="hstat">
       <span class="chip" id="roundChip">Lobby · 대기실</span>
       <span class="chip" id="playerChip">0 players · 참가자 0명</span>
